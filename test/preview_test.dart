@@ -69,5 +69,11 @@ void main() {
     await tester.pumpAndSettle();
     await capture('phone');
     expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Sotuv'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Angren'));
+    await tester.pumpAndSettle();
+    await capture('phone_modal');
+    expect(tester.takeException(), isNull);
   });
 }

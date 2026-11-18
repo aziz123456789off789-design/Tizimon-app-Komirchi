@@ -12,6 +12,7 @@ const green = Color(0xFF007AFF);
 const muted = Color(0xFF8E8E93);
 const canvas = Color(0xFFF2F2F7);
 const line = Color(0xFFE5E5EA);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -68,23 +69,24 @@ class ShopApp extends StatelessWidget {
       cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 0,
-        margin: const EdgeInsets.symmetric(vertical: 5),
+        margin: const EdgeInsets.symmetric(vertical: 4),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: line),
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: line, width: 0.8),
         ),
       ),
       textTheme: const TextTheme(
         headlineMedium: TextStyle(
-          fontSize: 29,
-          fontWeight: FontWeight.w700,
+          fontSize: 28,
+          fontWeight: FontWeight.w800,
           color: ink,
-          letterSpacing: -1,
+          letterSpacing: -0.8,
         ),
         titleLarge: TextStyle(
-          fontSize: 20,
+          fontSize: 19,
           fontWeight: FontWeight.w700,
           color: ink,
+          letterSpacing: -0.4,
         ),
         titleMedium: TextStyle(
           fontSize: 15,
@@ -96,38 +98,46 @@ class ShopApp extends StatelessWidget {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: canvas,
+        fillColor: const Color(0xFFF2F2F7),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: line),
+          borderSide: const BorderSide(color: line, width: 0.8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: green, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 16,
+          vertical: 14,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 19),
+          backgroundColor: green,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
+          elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-          side: const BorderSide(color: line),
+          foregroundColor: green,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          side: const BorderSide(color: line, width: 1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
-      dividerTheme: const DividerThemeData(color: line, space: 1),
+      dividerTheme: const DividerThemeData(color: line, space: 1, thickness: 0.5),
     ),
     home: ShopHome(store: store),
   );
@@ -159,7 +169,6 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
   void dispose() {
     store.removeListener(refresh);
     search.dispose();
-
     super.dispose();
   }
 
@@ -168,9 +177,15 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
     query = '';
     search.clear();
   });
+
   void notice(String text) => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
+    SnackBar(
+      content: Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
   );
+
   Future<bool> act(Future<void> Function() action, [String? message]) async {
     try {
       await action();
@@ -189,8 +204,23 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
     onChanged: (s) => setState(() => query = s),
     decoration: InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(fontSize: 13, color: muted),
-      prefixIcon: const Icon(Icons.search, size: 22, color: muted),
+      hintStyle: const TextStyle(fontSize: 14, color: muted),
+      fillColor: const Color(0xFFE5E5EA),
+      filled: true,
+      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: muted),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: green, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       suffixIcon: query.isEmpty
           ? null
           : IconButton(
@@ -198,14 +228,15 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                 search.clear();
                 query = '';
               }),
-              icon: const Icon(Icons.close, size: 18),
+              icon: const Icon(Icons.cancel_rounded, size: 18, color: muted),
             ),
     ),
   );
+
   Widget metric(String title, String value, IconData icon, Color color) =>
       panel(
         Padding(
-          padding: const EdgeInsets.all(17),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
@@ -214,20 +245,21 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(color: muted, fontSize: 12),
+                      style: const TextStyle(color: muted, fontSize: 12, fontWeight: FontWeight.w500),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 9),
+                    const SizedBox(height: 6),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
                         value,
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 19,
                           fontWeight: FontWeight.w700,
                           color: ink,
+                          letterSpacing: -0.4,
                         ),
                         maxLines: 1,
                       ),
@@ -237,10 +269,10 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.all(9),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: .08),
-                  borderRadius: BorderRadius.circular(11),
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 22),
               ),
@@ -248,60 +280,64 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
           ),
         ),
       );
+
   Widget panel(Widget child) => Material(
     color: Colors.white,
-    clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-      side: const BorderSide(color: line),
+      side: const BorderSide(color: line, width: 0.8),
     ),
+    clipBehavior: Clip.antiAlias,
     child: child,
   );
+
   Widget badge(String label, Color color) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
-      color: color.withValues(alpha: .08),
-      borderRadius: BorderRadius.circular(7),
+      color: color.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
       label,
-      style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600),
+      style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
     ),
   );
+
   Widget empty(String title, String description, IconData icon) => Center(
     child: Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(20),
             decoration: const BoxDecoration(
-              color: canvas,
+              color: Color(0xFFF2F2F7),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 34, color: muted),
+            child: Icon(icon, size: 36, color: muted),
           ),
           const SizedBox(height: 16),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: ink),
           ),
-          const SizedBox(height: 7),
+          const SizedBox(height: 6),
           Text(
             description,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: muted, height: 1.5),
+            style: const TextStyle(fontSize: 13, color: muted, height: 1.4),
           ),
         ],
       ),
     ),
   );
+
   Widget stats(List<Widget> items) => LayoutBuilder(
     builder: (context, c) => c.maxWidth < 650
         ? SizedBox(
-            height: 105,
+            height: 100,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: items
@@ -334,45 +370,53 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
         metric(
           'Naqd pul',
           '${money(store.cash)} so‘m',
-          Icons.payments_outlined,
-          green,
+          Icons.payments_rounded,
+          const Color(0xFF34C759),
         ),
         metric(
           'Karta hisobi',
           '${money(store.card)} so‘m',
-          Icons.credit_card,
-          const Color(0xFF688CB5),
+          Icons.credit_card_rounded,
+          green,
         ),
         metric(
           'Mijozlar qarzi',
           '${money(store.debt)} so‘m',
-          Icons.schedule,
-          const Color(0xFFC68B34),
+          Icons.schedule_rounded,
+          const Color(0xFFFF9500),
         ),
       ]),
-      const SizedBox(height: 20),
+      const SizedBox(height: 18),
       Row(
         children: [
           const Expanded(
             child: Text(
               'Pul harakati',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ink),
             ),
           ),
           OutlinedButton.icon(
             onPressed: () => cashDialog(false),
-            icon: const Icon(Icons.north_east, size: 16),
+            icon: const Icon(Icons.arrow_upward_rounded, size: 16),
             label: const Text('Chiqim'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
           const SizedBox(width: 8),
           FilledButton.icon(
             onPressed: () => cashDialog(true),
-            icon: const Icon(Icons.south_west, size: 16),
+            icon: const Icon(Icons.arrow_downward_rounded, size: 16),
             label: const Text('Kirim'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
         ],
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 14),
       Expanded(
         child: store.entries.isEmpty
             ? empty(
@@ -391,15 +435,23 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 18,
-                        vertical: 8,
+                        vertical: 6,
                       ),
-                      leading: CircleAvatar(
-                        backgroundColor: positive
-                            ? const Color(0xFFE9EEFF)
-                            : const Color(0xFFFBEFE9),
+                      leading: Container(
+                        padding: const EdgeInsets.all(9),
+                        decoration: BoxDecoration(
+                          color: positive
+                              ? const Color(0xFFEBF9EE)
+                              : const Color(0xFFFFEEEE),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Icon(
-                          positive ? Icons.south_west : Icons.north_east,
-                          color: positive ? green : Colors.deepOrange,
+                          positive
+                              ? Icons.arrow_downward_rounded
+                              : Icons.arrow_upward_rounded,
+                          color: positive
+                              ? const Color(0xFF34C759)
+                              : const Color(0xFFFF3B30),
                           size: 20,
                         ),
                       ),
@@ -407,19 +459,22 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                         e['note'],
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: 14,
+                          color: ink,
                         ),
                       ),
                       subtitle: Text(
                         '${dateLabel(date)} · ${timeLabel(date)} · ${e['method']}',
-                        style: const TextStyle(fontSize: 11, color: muted),
+                        style: const TextStyle(fontSize: 12, color: muted),
                       ),
                       trailing: Text(
                         '${positive ? '+' : '−'}${money((e['amount'] as int).abs())}\nso‘m',
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: positive ? green : Colors.deepOrange,
+                          color: positive
+                              ? const Color(0xFF34C759)
+                              : const Color(0xFFFF3B30),
                           fontSize: 13,
                         ),
                       ),
@@ -445,30 +500,30 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
           metric(
             'Jami mijozlar',
             '${store.customers.length} ta',
-            Icons.people_outline,
+            Icons.people_alt_rounded,
             green,
           ),
           metric(
             'Qarzdor mijozlar',
             '${store.customers.where((c) => c['debt'] > 0).length} ta',
-            Icons.person_outline,
-            const Color(0xFF688CB5),
+            Icons.person_rounded,
+            const Color(0xFFFF9500),
           ),
           metric(
             'Jami qarzdorlik',
             '${money(store.debt)} so‘m',
-            Icons.schedule,
-            const Color(0xFFC68B34),
+            Icons.schedule_rounded,
+            const Color(0xFFFF3B30),
           ),
         ]),
-        const SizedBox(height: 18),
-        searchField('Ism yoki telefon orqali qidirish'),
         const SizedBox(height: 16),
+        searchField('Ism yoki telefon orqali qidirish'),
+        const SizedBox(height: 14),
         Expanded(
           child: people.isEmpty
               ? empty(
                   'Mijozlar topilmadi',
-                  'Yuqoridagi + tugmasi orqali mijoz qo‘shing.',
+                  'Pastdagi + tugmasi orqali mijoz qo‘shing.',
                   Icons.people_outline,
                 )
               : panel(
@@ -480,15 +535,22 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                       return ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 18,
-                          vertical: 10,
+                          vertical: 8,
                         ),
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFE9EEFF),
+                        leading: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEBF3FF),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
                           child: Text(
                             (c['name'] as String).substring(0, 1).toUpperCase(),
                             style: const TextStyle(
                               color: green,
                               fontWeight: FontWeight.w700,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -496,7 +558,8 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                           c['name'],
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                            fontSize: 15,
+                            color: ink,
                           ),
                         ),
                         subtitle: Text(
@@ -508,16 +571,22 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                         trailing: c['debt'] > 0
                             ? TextButton(
                                 onPressed: () => repaymentDialog(c),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  backgroundColor: const Color(0xFFFFF4E5),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
                                 child: Text(
                                   '${money(c['debt'])} so‘m\nQarzni to‘lash',
                                   textAlign: TextAlign.right,
                                   style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFFB87830),
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFFE65100),
                                   ),
                                 ),
                               )
-                            : badge('Qarz yo‘q', green),
+                            : badge('Qarz yo‘q', const Color(0xFF34C759)),
                         onTap: () => customerDetails(c),
                       );
                     },
@@ -535,55 +604,119 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
   ) async {
     final form = GlobalKey<FormState>();
     bool saving = false;
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
-      barrierDismissible: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, update) => PopScope(
           canPop: !saving,
-          child: AlertDialog(
-            title: Text(title),
-            content: SizedBox(
-              width: 420,
-              child: Form(
-                key: form,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: fields
-                        .map(
-                          (w) => Padding(
-                            padding: const EdgeInsets.only(bottom: 15),
-                            child: w,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.9,
+              maxWidth: 560,
+            ),
+            margin: EdgeInsets.symmetric(
+              horizontal: MediaQuery.sizeOf(dialogContext).width > 600
+                  ? (MediaQuery.sizeOf(dialogContext).width - 560) / 2
+                  : 0,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              12,
+              20,
+              MediaQuery.viewInsetsOf(dialogContext).bottom + 20,
+            ),
+            child: Form(
+              key: form,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD1D1D6),
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: ink,
                           ),
-                        )
-                        .toList(),
-                  ),
+                        ),
+                        IconButton(
+                          onPressed: saving ? null : () => Navigator.pop(dialogContext),
+                          icon: const Icon(Icons.close_rounded, color: muted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ...fields.map(
+                      (w) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: w,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    FilledButton(
+                      onPressed: saving
+                          ? null
+                          : () async {
+                              if (!form.currentState!.validate()) return;
+                              update(() => saving = true);
+                              final ok = await act(save);
+                              if (!dialogContext.mounted) return;
+                              if (ok) {
+                                Navigator.pop(dialogContext);
+                              } else {
+                                update(() => saving = false);
+                              }
+                            },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        saving ? 'Saqlanmoqda...' : 'Saqlash',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextButton(
+                      onPressed: saving ? null : () => Navigator.pop(dialogContext),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        foregroundColor: muted,
+                      ),
+                      child: const Text('Bekor qilish'),
+                    ),
+                  ],
                 ),
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: saving ? null : () => Navigator.pop(dialogContext),
-                child: const Text('Bekor qilish'),
-              ),
-              FilledButton(
-                onPressed: saving
-                    ? null
-                    : () async {
-                        if (!form.currentState!.validate()) return;
-                        update(() => saving = true);
-                        final ok = await act(save);
-                        if (!dialogContext.mounted) return;
-                        if (ok) {
-                          Navigator.pop(dialogContext);
-                        } else {
-                          update(() => saving = false);
-                        }
-                      },
-                child: Text(saving ? 'Saqlanmoqda...' : 'Saqlash'),
-              ),
-            ],
           ),
         ),
       ),
@@ -598,7 +731,19 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
     bool positive = false,
   }) => TextFormField(
     controller: controller,
-    decoration: InputDecoration(labelText: label),
+    decoration: InputDecoration(
+      labelText: label,
+      fillColor: const Color(0xFFF2F2F7),
+      filled: true,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: line, width: 0.8),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: green, width: 1.5),
+      ),
+    ),
     keyboardType: numeric ? TextInputType.number : TextInputType.text,
     inputFormatters: numeric ? [FilteringTextInputFormatter.digitsOnly] : null,
     validator: (v) {
@@ -650,18 +795,31 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
   Widget methodField(ValueChanged<String> onChanged) =>
       DropdownButtonFormField<String>(
         initialValue: 'Naqd',
-        decoration: const InputDecoration(labelText: 'To‘lov turi'),
+        decoration: InputDecoration(
+          labelText: 'To‘lov turi',
+          fillColor: const Color(0xFFF2F2F7),
+          filled: true,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: line, width: 0.8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: green, width: 1.5),
+          ),
+        ),
         items: [
           'Naqd',
           'Karta',
         ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
         onChanged: (v) => onChanged(v!),
       );
+
   Future<void> repaymentDialog(Json c) async {
     final amount = TextEditingController(text: c['debt'].toString());
     var method = 'Naqd';
     await formDialog('Qarzni qabul qilish', [
-      Text('${c['name']}\nQarz: ${money(c['debt'])} so‘m'),
+      Text('${c['name']}\nQarz: ${money(c['debt'])} so‘m', style: const TextStyle(fontWeight: FontWeight.w600)),
       field(amount, 'To‘lov, so‘m', numeric: true, positive: true),
       methodField((v) => method = v),
     ], () => store.repay(c['id'], int.parse(amount.text), method));
@@ -671,138 +829,329 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
 
   void customerDetails(Json c) {
     final sales = store.sales.where((s) => s['customerId'] == c['id']).toList();
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(c['name']),
-        content: SizedBox(
-          width: 450,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Telefon: ${c['phone']}'),
-                const SizedBox(height: 10),
-                Text('Qarz: ${money(c['debt'])} so‘m'),
-                const SizedBox(height: 20),
-                const Text(
-                  'Xaridlar tarixi',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
+          maxWidth: 560,
+        ),
+        margin: EdgeInsets.symmetric(
+          horizontal: MediaQuery.sizeOf(ctx).width > 600
+              ? (MediaQuery.sizeOf(ctx).width - 560) / 2
+              : 0,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D6),
+                  borderRadius: BorderRadius.circular(2.5),
                 ),
-                if (sales.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 12),
-                    child: Text('Hozircha xaridlar yo‘q.'),
-                  ),
-                ...sales.reversed.map(
-                  (s) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      'Chek #${s['number']} · ${money(s['total'])} so‘m',
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    c['name'],
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: ink,
                     ),
-                    subtitle: Text(
-                      '${dateLabel(DateTime.parse(s['date']))} · ${s['method']}',
-                    ),
-                    onTap: () => showReceipt(s),
                   ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close_rounded, color: muted),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: canvas,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: line),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Telefon:', style: TextStyle(color: muted, fontSize: 13)),
+                      Text(
+                        c['phone'].isEmpty ? 'Kiritilmagan' : c['phone'],
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: ink),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Qarz:', style: TextStyle(color: muted, fontSize: 13)),
+                      Text(
+                        '${money(c['debt'])} so‘m',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: c['debt'] > 0 ? const Color(0xFFFF9500) : const Color(0xFF34C759),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Xaridlar tarixi',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: ink),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: sales.isEmpty
+                  ? const Center(
+                      child: Text('Hozircha xaridlar yo‘q.', style: TextStyle(color: muted)),
+                    )
+                  : ListView.separated(
+                      itemCount: sales.length,
+                      separatorBuilder: (_, i) => const Divider(),
+                      itemBuilder: (_, i) {
+                        final s = sales.reversed.elementAt(i);
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            'Chek #${s['number']} · ${money(s['total'])} so‘m',
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                          subtitle: Text(
+                            '${dateLabel(DateTime.parse(s['date']))} · ${s['method']}',
+                            style: const TextStyle(fontSize: 12, color: muted),
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded, color: muted),
+                          onTap: () => showReceipt(s),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Yopish'),
-          ),
-        ],
       ),
     );
   }
 
-  void history() => showDialog<void>(
+  void history() => showModalBottomSheet<void>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('Sotuvlar tarixi'),
-      content: SizedBox(
-        width: 500,
-        height: 420,
-        child: store.sales.isEmpty
-            ? empty(
-                'Sotuvlar hali yo‘q',
-                'Yakunlangan savdolar shu yerda saqlanadi.',
-                Icons.receipt_long_outlined,
-              )
-            : ListView.separated(
-                itemCount: store.sales.length,
-                separatorBuilder: (_, i) => const Divider(),
-                itemBuilder: (_, i) {
-                  final s = store.sales.reversed.elementAt(i);
-                  return ListTile(
-                    title: Text(
-                      'Chek #${s['number']} · ${money(s['total'])} so‘m',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    subtitle: Text(
-                      '${dateLabel(DateTime.parse(s['date']))} · ${timeLabel(DateTime.parse(s['date']))}\n${s['customer']} · ${s['method']}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => showReceipt(s),
-                  );
-                },
-              ),
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
+        maxWidth: 560,
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Yopish'),
-        ),
-      ],
-    ),
-  );
-  void showReceipt(Json s) => showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Row(
+      margin: EdgeInsets.symmetric(
+        horizontal: MediaQuery.sizeOf(ctx).width > 600
+            ? (MediaQuery.sizeOf(ctx).width - 560) / 2
+            : 0,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.check_circle, color: green),
-          const SizedBox(width: 10),
-          Text('Chek #${s['number']}'),
+          Center(
+            child: Container(
+              width: 36,
+              height: 5,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD1D1D6),
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Sotuvlar tarixi',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: ink,
+                ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.pop(ctx),
+                icon: const Icon(Icons.close_rounded, color: muted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: store.sales.isEmpty
+                ? empty(
+                    'Sotuvlar hali yo‘q',
+                    'Yakunlangan savdolar shu yerda saqlanadi.',
+                    Icons.receipt_long_outlined,
+                  )
+                : ListView.separated(
+                    itemCount: store.sales.length,
+                    separatorBuilder: (_, i) => const Divider(),
+                    itemBuilder: (_, i) {
+                      final s = store.sales.reversed.elementAt(i);
+                      return ListTile(
+                        title: Text(
+                          'Chek #${s['number']} · ${money(s['total'])} so‘m',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${dateLabel(DateTime.parse(s['date']))} · ${timeLabel(DateTime.parse(s['date']))}\n${s['customer']} · ${s['method']}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: muted),
+                        onTap: () => showReceipt(s),
+                      );
+                    },
+                  ),
+          ),
         ],
       ),
-      content: SizedBox(
-        width: 380,
-        child: SingleChildScrollView(
-          child: SelectableText(
-            coalReceipt(s),
-            style: const TextStyle(height: 1.8, fontSize: 14),
-          ),
+    ),
+  );
+
+  void showReceipt(Json s) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
+        maxWidth: 560,
+      ),
+      margin: EdgeInsets.symmetric(
+        horizontal: MediaQuery.sizeOf(ctx).width > 600
+            ? (MediaQuery.sizeOf(ctx).width - 560) / 2
+            : 0,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D6),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Color(0xFF34C759), size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  'Chek #${s['number']}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close_rounded, color: muted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: canvas,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: line),
+              ),
+              child: SelectableText(
+                coalReceipt(s),
+                style: const TextStyle(height: 1.8, fontSize: 13.5, color: ink),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if ((s['phone'] ?? '').isNotEmpty) ...[
+              FilledButton.icon(
+                onPressed: () => compose(s),
+                icon: const Icon(Icons.sms_outlined, size: 18),
+                label: const Text('SMS yuborish'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFE5F1FF),
+                  foregroundColor: green,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+            OutlinedButton.icon(
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: coalReceipt(s)));
+                if (mounted) notice('Chek nusxalandi.');
+              },
+              icon: const Icon(Icons.copy_rounded, size: 18),
+              label: const Text('Nusxalash'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: FilledButton.styleFrom(
+                backgroundColor: green,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              child: const Text('Tayyor'),
+            ),
+          ],
         ),
       ),
-      actions: [
-        if ((s['phone'] ?? '').isNotEmpty)
-          TextButton(
-            onPressed: () => compose(s),
-            child: const Text('SMS yuborish'),
-          ),
-        TextButton.icon(
-          onPressed: () async {
-            await Clipboard.setData(ClipboardData(text: coalReceipt(s)));
-            if (mounted) notice('Chek nusxalandi.');
-          },
-          icon: const Icon(Icons.copy, size: 16),
-          label: const Text('Nusxalash'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Tayyor'),
-        ),
-      ],
     ),
   );
 }

@@ -12,60 +12,90 @@ mixin CoalScreens on State<ShopHome> {
   Widget customersPage();
   Future<void> customerDialog();
   void navigate(int page);
+
   static const names = ['Hisobotlar', 'Sotuv', 'Ombor', 'Kassa', 'Mijozlar'];
   static const symbols = [
-    Icons.insights,
-    Icons.point_of_sale,
-    Icons.warehouse_outlined,
-    Icons.wallet_outlined,
-    Icons.people_outline,
+    Icons.bar_chart_outlined,
+    Icons.point_of_sale_outlined,
+    Icons.inventory_2_outlined,
+    Icons.account_balance_wallet_outlined,
+    Icons.people_outline_rounded,
   ];
+  static const activeSymbols = [
+    Icons.bar_chart_rounded,
+    Icons.point_of_sale_rounded,
+    Icons.inventory_2_rounded,
+    Icons.account_balance_wallet_rounded,
+    Icons.people_alt_rounded,
+  ];
+
   @override
   Widget build(BuildContext context) => Scaffold(
+    extendBody: true,
     appBar: AppBar(
-      toolbarHeight: 72,
-      backgroundColor: Colors.white,
+      toolbarHeight: 64,
+      backgroundColor: Colors.white.withOpacity(0.92),
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(0.5),
+        child: Divider(height: 0.5, thickness: 0.5, color: line),
+      ),
       title: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset('assets/tizimon.png', width: 48, height: 48),
+            borderRadius: BorderRadius.circular(11),
+            child: Image.asset('assets/tizimon.png', width: 42, height: 42),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Tizimon',
                 style: TextStyle(
-                  fontSize: 23,
+                  fontSize: 21,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: -.8,
+                  letterSpacing: -0.6,
                   color: ink,
                 ),
               ),
               Text(
                 'Xo‘jalar ko‘mir ombori',
-                style: TextStyle(fontSize: 12, color: muted),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: muted,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
         ],
       ),
       actions: [
-        IconButton(
-          tooltip: 'Sotuvlar tarixi',
-          onPressed: history,
-          icon: const Icon(Icons.history),
+        Padding(
+          padding: const EdgeInsets.only(right: 14),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF2F2F7),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              tooltip: 'Sotuvlar tarixi',
+              onPressed: history,
+              icon: const Icon(Icons.history_rounded, color: ink, size: 22),
+            ),
+          ),
         ),
       ],
     ),
     body: SafeArea(
+      bottom: false,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 900),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 75),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -73,7 +103,7 @@ mixin CoalScreens on State<ShopHome> {
                   names[page],
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 Expanded(
                   child: switch (page) {
                     0 => reports(),
@@ -83,11 +113,27 @@ mixin CoalScreens on State<ShopHome> {
                   },
                 ),
                 if (page == 2 || page == 4)
-                  FilledButton.icon(
-                    icon: const Icon(Icons.add),
-                    onPressed: page == 2 ? () => editCoal() : customerDialog,
-                    label: Text(
-                      page == 2 ? 'Mahsulot qo‘shish' : 'Mijoz qo‘shish',
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 3,
+                        shadowColor: green.withOpacity(0.35),
+                      ),
+                      icon: const Icon(Icons.add_rounded, size: 20),
+                      onPressed: page == 2 ? () => editCoal() : customerDialog,
+                      label: Text(
+                        page == 2 ? 'Mahsulot qo‘shish' : 'Mijoz qo‘shish',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
               ],
@@ -96,122 +142,334 @@ mixin CoalScreens on State<ShopHome> {
         ),
       ),
     ),
-    bottomNavigationBar: NavigationBar(
-      backgroundColor: Colors.white,
-      indicatorColor: const Color(0xFFE2E9FF),
-      selectedIndex: page,
-      onDestinationSelected: navigate,
-      destinations: List.generate(
-        5,
-        (i) => NavigationDestination(icon: Icon(symbols[i]), label: names[i]),
+    bottomNavigationBar: ClipRect(
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.82),
+            border: const Border(
+              top: BorderSide(color: Color(0x1F000000), width: 0.5),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 56,
+              child: Row(
+                children: List.generate(5, (i) {
+                  final selected = page == i;
+                  return Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        navigate(i);
+                      },
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            selected ? activeSymbols[i] : symbols[i],
+                            color: selected ? green : muted,
+                            size: 24,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            names[i],
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: selected ? green : muted,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
       ),
     ),
   );
+
   Widget reports() {
     final now = DateTime.now();
     int sum(bool Function(DateTime) matches) => store.sales
         .where((s) => matches(DateTime.parse(s['date']).toLocal()))
         .fold(0, (n, s) => n + (s['total'] as int));
-    final amounts = [
-      sum((_) => true),
-      sum((d) => d.year == now.year && d.month == now.month),
-      sum((d) => d.year == now.year),
-    ];
+
+    final todaySales = sum(
+      (d) => d.year == now.year && d.month == now.month && d.day == now.day,
+    );
+    final totalSales = sum((_) => true);
+    final monthlySales = sum((d) => d.year == now.year && d.month == now.month);
+    final yearlySales = sum((d) => d.year == now.year);
+    final todayCount = store.sales
+        .where((s) {
+          final d = DateTime.parse(s['date']).toLocal();
+          return d.year == now.year && d.month == now.month && d.day == now.day;
+        })
+        .length;
+
     return ListView(
+      padding: const EdgeInsets.only(bottom: 24),
       children: [
+        // Hero Card: Bugungi savdo
         Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF203781), green],
-              begin: Alignment.bottomLeft,
-              end: Alignment.topRight,
+              colors: [Color(0xFF007AFF), Color(0xFF0051C7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x38007AFF),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: Colors.white70,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.today_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Bugungi savdo',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Umumiy savdo',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$todayCount ta sotuv',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${money(todaySales)} so‘m',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
               Text(
-                '${money(amounts.first)} so‘m',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 34,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1,
+                '${dateLabel(now)} holatiga ko‘ra',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.75),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
-        for (var i = 1; i < 3; i++)
-          Card(
-            color: i == 0 ? green : Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(22),
+        _reportCard(
+          title: 'Umumiy savdo',
+          amount: totalSales,
+          icon: Icons.all_inclusive_rounded,
+          iconColor: const Color(0xFF007AFF),
+          iconBg: const Color(0xFFEAF2FF),
+        ),
+        const SizedBox(height: 12),
+        _reportCard(
+          title: 'Oylik savdo',
+          amount: monthlySales,
+          icon: Icons.calendar_month_rounded,
+          iconColor: const Color(0xFF5856D6),
+          iconBg: const Color(0xFFF0EFFF),
+        ),
+        const SizedBox(height: 12),
+        _reportCard(
+          title: 'Yillik savdo',
+          amount: yearlySales,
+          icon: Icons.date_range_rounded,
+          iconColor: const Color(0xFF34C759),
+          iconBg: const Color(0xFFEBF9EE),
+        ),
+        const SizedBox(height: 16),
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: history,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: line),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x06000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: const Color(0xFFEBEFFF),
-                    child: Icon(
-                      i == 1 ? Icons.calendar_month_outlined : Icons.date_range,
-                      color: green,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF4E5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.receipt_long_rounded,
+                      color: Color(0xFFFF9500),
+                      size: 22,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
+                  const SizedBox(width: 14),
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          ['Umumiy savdo', 'Oylik savdo', 'Yillik savdo'][i],
+                          'Sotuvlar tarixi',
                           style: TextStyle(
-                            color: i == 0 ? Colors.white70 : muted,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: ink,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 2),
                         Text(
-                          '${money(amounts[i])} so‘m',
-                          style: TextStyle(
-                            color: i == 0 ? Colors.white : ink,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          'Barcha cheklar va sotuv amallari',
+                          style: TextStyle(fontSize: 12, color: muted),
                         ),
                       ],
                     ),
                   ),
+                  const Icon(Icons.chevron_right_rounded, color: muted),
                 ],
               ),
             ),
           ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: history,
-          icon: const Icon(Icons.receipt_long),
-          label: const Text('Sotuvlar tarixi'),
         ),
       ],
     );
   }
+
+  Widget _reportCard({
+    required String title,
+    required num amount,
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+  }) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: line),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x06000000),
+          blurRadius: 10,
+          offset: Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: iconBg,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: muted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${money(amount)} so‘m',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget catalog() {
     final products = store.coal
@@ -224,29 +482,33 @@ mixin CoalScreens on State<ShopHome> {
     return Column(
       children: [
         searchField('Ko‘mir nomi yoki kategoriya'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Expanded(
           child: products.isEmpty
               ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CircleAvatar(
-                        radius: 32,
-                        backgroundColor: Color(0xFFE5EBFF),
-                        child: Icon(
-                          Icons.terrain_outlined,
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF2F2F7),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.terrain_rounded,
                           color: green,
-                          size: 32,
+                          size: 34,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                       Text(
                         query.isEmpty
                             ? 'Ko‘mir katalogi bo‘sh'
                             : 'Mahsulot topilmadi',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
+                      const SizedBox(height: 8),
                       TextButton(
                         onPressed: () => editCoal(),
                         child: const Text('Ko‘mir turini qo‘shish'),
@@ -254,17 +516,44 @@ mixin CoalScreens on State<ShopHome> {
                     ],
                   ),
                 )
-              : ListView.builder(
+              : ListView.separated(
                   itemCount: products.length,
+                  separatorBuilder: (_, i) => const SizedBox(height: 10),
                   itemBuilder: (_, i) {
                     final p = products[i];
                     return Card(
                       child: ListTile(
-                        leading: const CircleAvatar(child: Icon(Icons.terrain)),
-                        title: Text(p['name']),
-                        subtitle: Text(p['category']),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEBF3FF),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.terrain_rounded,
+                            color: green,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          p['name'],
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: ink,
+                          ),
+                        ),
+                        subtitle: Text(
+                          p['category'],
+                          style: const TextStyle(fontSize: 12, color: muted),
+                        ),
                         trailing: Icon(
-                          page == 2 ? Icons.edit_outlined : Icons.chevron_right,
+                          page == 2 ? Icons.edit_outlined : Icons.chevron_right_rounded,
+                          color: muted,
                         ),
                         onTap: () => page == 2 ? editCoal(p) : saleForm(p),
                       ),
@@ -283,13 +572,25 @@ mixin CoalScreens on State<ShopHome> {
     var creating = store.groups.isEmpty;
     await editor(
       product == null ? 'Yangi ko‘mir turi' : 'Ko‘mir turini tahrirlash',
-      Icons.terrain,
+      Icons.terrain_rounded,
       (update) => [
         input('Mahsulot nomi', (v) => name = v, initial: name),
         if (!creating)
           DropdownButtonFormField<String>(
             initialValue: group,
-            decoration: const InputDecoration(labelText: 'Kategoriya'),
+            decoration: InputDecoration(
+              labelText: 'Kategoriya',
+              fillColor: const Color(0xFFF2F2F7),
+              filled: true,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: line, width: 0.8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: green, width: 1.5),
+              ),
+            ),
             items: store.groups
                 .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                 .toList(),
@@ -297,13 +598,17 @@ mixin CoalScreens on State<ShopHome> {
           ),
         if (creating) input('Yangi kategoriya nomi', (v) => newGroup = v),
         if (store.groups.isNotEmpty)
-          TextButton.icon(
-            onPressed: () => update(() => creating = !creating),
-            icon: const Icon(Icons.category_outlined),
-            label: Text(
-              creating
-                  ? 'Saqlangan kategoriyalardan tanlash'
-                  : 'Yangi kategoriya yaratish',
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => update(() => creating = !creating),
+              icon: const Icon(Icons.category_outlined, size: 18),
+              label: Text(
+                creating
+                    ? 'Saqlangan kategoriyalardan tanlash'
+                    : 'Yangi kategoriya yaratish',
+                style: const TextStyle(fontSize: 13),
+              ),
             ),
           ),
       ],
@@ -327,8 +632,21 @@ mixin CoalScreens on State<ShopHome> {
     initialValue: initial,
     onChanged: change,
     keyboardType: keyboard,
-    decoration: InputDecoration(labelText: label),
+    decoration: InputDecoration(
+      labelText: label,
+      fillColor: const Color(0xFFF2F2F7),
+      filled: true,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: line, width: 0.8),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: green, width: 1.5),
+      ),
+    ),
   );
+
   Future<void> editor(
     String title,
     IconData icon,
@@ -338,9 +656,10 @@ mixin CoalScreens on State<ShopHome> {
   }) async {
     var saving = false;
     String? error;
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
-      barrierDismissible: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, update) {
           Future<void> submit(bool message) async {
@@ -350,52 +669,147 @@ mixin CoalScreens on State<ShopHome> {
               await save(message);
               if (ctx.mounted) Navigator.pop(ctx);
             } catch (e) {
-              if (ctx.mounted)
+              if (ctx.mounted) {
                 update(() {
                   error = e is StateError
                       ? e.message
                       : 'Saqlashda xatolik yuz berdi.';
                   saving = false;
                 });
+              }
             }
           }
 
           return PopScope(
             canPop: !saving,
-            child: AlertDialog(
-              icon: Icon(icon, color: green),
-              title: Text(title),
-              scrollable: true,
-              content: SizedBox(
-                width: 440,
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+                maxWidth: 560,
+              ),
+              margin: EdgeInsets.symmetric(
+                horizontal: MediaQuery.sizeOf(ctx).width > 600
+                    ? (MediaQuery.sizeOf(ctx).width - 560) / 2
+                    : 0,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                12,
+                20,
+                MediaQuery.viewInsetsOf(ctx).bottom + 20,
+              ),
+              child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final w in fields(update))
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: w,
-                      ),
-                    if (error != null)
-                      Text(error!, style: const TextStyle(color: Colors.red)),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        FilledButton(
-                          onPressed: saving ? null : () => submit(false),
-                          child: const Text('Saqlash'),
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD1D1D6),
+                          borderRadius: BorderRadius.circular(2.5),
                         ),
-                        if (sms)
-                          OutlinedButton(
-                            onPressed: saving ? null : () => submit(true),
-                            child: const Text('Saqlash va xabar yuborish'),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEBF3FF),
+                            borderRadius: BorderRadius.circular(10),
                           ),
+                          child: Icon(icon, color: green, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              color: ink,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: saving ? null : () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, color: muted),
+                        ),
                       ],
                     ),
+                    const SizedBox(height: 18),
+                    for (final w in fields(update))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: w,
+                      ),
+                    if (error != null) ...[
+                      Text(
+                        error!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    const SizedBox(height: 6),
+                    FilledButton(
+                      onPressed: saving ? null : () => submit(false),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        saving ? 'Saqlanmoqda...' : 'Saqlash',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    if (sms) ...[
+                      const SizedBox(height: 10),
+                      FilledButton(
+                        onPressed: saving ? null : () => submit(true),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFE5F1FF),
+                          foregroundColor: green,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text(
+                          'Saqlash va xabar yuborish',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
                     TextButton(
                       onPressed: saving ? null : () => Navigator.pop(ctx),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        foregroundColor: muted,
+                      ),
                       child: const Text('Bekor qilish'),
                     ),
                   ],
@@ -420,49 +834,159 @@ mixin CoalScreens on State<ShopHome> {
     var send = false;
     await editor(
       product['name'],
-      Icons.point_of_sale,
-      (update) => [
-        SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: 'kg', label: Text('Kilogramm')),
-            ButtonSegment(value: 'tonna', label: Text('Tonna')),
-          ],
-          selected: {unit},
-          onSelectionChanged: (v) => update(() => unit = v.first),
-        ),
-        input(
-          'Miqdor',
-          (v) => update(() => quantity = v),
-          keyboard: const TextInputType.numberWithOptions(decimal: true),
-        ),
-        TextFormField(
-          onChanged: (v) => update(() => price = v),
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: '1 $unit narxi, so‘m'),
-        ),
-        Text(
-          'Jami: ${money((double.tryParse(quantity.replaceAll(',', '.')) ?? 0) * (int.tryParse(price) ?? 0))} so‘m',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        DropdownButtonFormField<String>(
-          initialValue: method,
-          decoration: const InputDecoration(labelText: 'To‘lov usuli'),
-          items: [
-            'Naqd',
-            'Karta',
-            'Qarz',
-          ].map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
-          onChanged: (m) => update(() => method = m!),
-        ),
-        _CustomerFields(
-          customers: store.customers,
-          changed: (id, currentName, number) {
-            customerId = id;
-            name = currentName;
-            phone = number;
-          },
-        ),
-      ],
+      Icons.point_of_sale_rounded,
+      (update) {
+        final q = double.tryParse(quantity.replaceAll(',', '.')) ?? 0;
+        final p = int.tryParse(price) ?? 0;
+        final total = (q * p).round();
+        return [
+          // iOS Segmented Control: Kilogramm / Tonna (never wraps!)
+          Container(
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEEF0),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(3),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => update(() => unit = 'kg'),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: unit == 'kg' ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: unit == 'kg'
+                            ? const [
+                                BoxShadow(
+                                  color: Color(0x14000000),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Kilogramm',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              unit == 'kg' ? FontWeight.w600 : FontWeight.w500,
+                          color: unit == 'kg' ? ink : muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => update(() => unit = 'tonna'),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: unit == 'tonna' ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: unit == 'tonna'
+                            ? const [
+                                BoxShadow(
+                                  color: Color(0x14000000),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Tonna',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              unit == 'tonna' ? FontWeight.w600 : FontWeight.w500,
+                          color: unit == 'tonna' ? ink : muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          input(
+            'Miqdor',
+            (v) => update(() => quantity = v),
+            keyboard: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          TextFormField(
+            onChanged: (v) => update(() => price = v),
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: '1 $unit narxi, so‘m',
+              fillColor: const Color(0xFFF2F2F7),
+              filled: true,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: line, width: 0.8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: green, width: 1.5),
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F6FF),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFD6E4FF)),
+            ),
+            alignment: Alignment.center,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'Jami: ${money(total)} so‘m',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: green,
+                ),
+              ),
+            ),
+          ),
+          DropdownButtonFormField<String>(
+            initialValue: method,
+            decoration: InputDecoration(
+              labelText: 'To‘lov usuli',
+              fillColor: const Color(0xFFF2F2F7),
+              filled: true,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: line, width: 0.8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: green, width: 1.5),
+              ),
+            ),
+            items: [
+              'Naqd',
+              'Karta',
+              'Qarz',
+            ].map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+            onChanged: (m) => update(() => method = m!),
+          ),
+          _CustomerFields(
+            customers: store.customers,
+            changed: (id, currentName, number) {
+              customerId = id;
+              name = currentName;
+              phone = number;
+            },
+          ),
+        ];
+      },
       (message) async {
         if (message && phone.trim().isEmpty)
           throw StateError('SMS uchun telefon raqamini kiriting.');
@@ -530,7 +1054,19 @@ class _CustomerFieldsState extends State<_CustomerFields> {
       children: [
         TextField(
           controller: name,
-          decoration: const InputDecoration(labelText: 'Mijoz ismi'),
+          decoration: InputDecoration(
+            labelText: 'Mijoz ismi',
+            fillColor: const Color(0xFFF2F2F7),
+            filled: true,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: line, width: 0.8),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: green, width: 1.5),
+            ),
+          ),
           onChanged: (_) {
             setState(() {
               if (selected != null) phone.clear();
@@ -540,35 +1076,63 @@ class _CustomerFieldsState extends State<_CustomerFields> {
           },
         ),
         if (selected == null && prefix.isNotEmpty && matches.isNotEmpty)
-          SizedBox(
-            height: matches.length < 3 ? matches.length * 76.0 : 180,
-            child: ListView.builder(
-              shrinkWrap: true,
-              primary: false,
-              itemCount: matches.length,
-              itemBuilder: (_, i) {
-                final c = matches[i];
-                return ListTile(
-                  title: Text(c['name']),
-                  subtitle: Text(c['phone']),
-                  onTap: () {
-                    setState(() {
-                      selected = c['id'];
-                      name.text = c['name'];
-                      phone.text = c['phone'];
-                    });
-                    publish();
-                    FocusScope.of(context).unfocus();
-                  },
-                );
-              },
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            height: matches.length < 3 ? matches.length * 64.0 : 180,
+            child: Material(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: line),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: ListView.separated(
+                shrinkWrap: true,
+                primary: false,
+                separatorBuilder: (_, i) => const Divider(height: 1),
+                itemCount: matches.length,
+                itemBuilder: (_, i) {
+                  final c = matches[i];
+                  return ListTile(
+                    title: Text(
+                      c['name'],
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      c['phone'],
+                      style: const TextStyle(fontSize: 12, color: muted),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        selected = c['id'];
+                        name.text = c['name'];
+                        phone.text = c['phone'];
+                      });
+                      publish();
+                      FocusScope.of(context).unfocus();
+                    },
+                  );
+                },
+              ),
             ),
           ),
         const SizedBox(height: 12),
         TextField(
           controller: phone,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(labelText: 'Telefon raqami'),
+          decoration: InputDecoration(
+            labelText: 'Telefon raqami',
+            fillColor: const Color(0xFFF2F2F7),
+            filled: true,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: line, width: 0.8),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: green, width: 1.5),
+            ),
+          ),
           onChanged: (_) => publish(),
         ),
       ],
