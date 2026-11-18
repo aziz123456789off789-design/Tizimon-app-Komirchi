@@ -1,0 +1,13 @@
+.tools/
+.dart_tool/
+.flutter-plugins-dependencies
+build/
+*.iml
+.idea/
+android/local.properties
+android/.gradle/
+windows/flutter/ephemeral/
+artifacts/
+*.log
+android/key.properties
+*.jks

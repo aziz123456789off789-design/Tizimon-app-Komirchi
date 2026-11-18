@@ -1,0 +1,20 @@
+name: dokon
+description: Do'kon uchun sotuv, ombor, kassa va mijozlar boshqaruvi.
+publish_to: none
+version: 1.2.0+4
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+  flutter: '>=3.35.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider: ^2.1.5
+  web: ^1.1.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/tizimon.png
