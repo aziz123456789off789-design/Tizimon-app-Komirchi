@@ -223,99 +223,128 @@ mixin CoalScreens on State<ShopHome> {
       padding: const EdgeInsets.only(bottom: 24),
       children: [
         // Hero Card: Bugungi savdo
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF007AFF), Color(0xFF0051C7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: history,
             borderRadius: BorderRadius.circular(22),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x38007AFF),
-                blurRadius: 18,
-                offset: Offset(0, 8),
+            child: Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF007AFF), Color(0xFF0051C7)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x38007AFF),
+                    blurRadius: 18,
+                    offset: Offset(0, 8),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.today_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.today_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Bugungi savdo',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Bugungi savdo',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          letterSpacing: -0.3,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '$todayCount ta sotuv',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                  const SizedBox(height: 20),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
                     child: Text(
-                      '$todayCount ta sotuv',
+                      '${money(todaySales)} so‘m',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1,
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${dateLabel(now)} holatiga ko‘ra',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Tarixni ko‘rish',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${money(todaySales)} so‘m',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${dateLabel(now)} holatiga ko‘ra',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.75),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -325,6 +354,7 @@ mixin CoalScreens on State<ShopHome> {
           icon: Icons.all_inclusive_rounded,
           iconColor: const Color(0xFF007AFF),
           iconBg: const Color(0xFFEAF2FF),
+          onTap: history,
         ),
         const SizedBox(height: 12),
         _reportCard(
@@ -333,6 +363,7 @@ mixin CoalScreens on State<ShopHome> {
           icon: Icons.calendar_month_rounded,
           iconColor: const Color(0xFF5856D6),
           iconBg: const Color(0xFFF0EFFF),
+          onTap: history,
         ),
         const SizedBox(height: 12),
         _reportCard(
@@ -341,8 +372,28 @@ mixin CoalScreens on State<ShopHome> {
           icon: Icons.date_range_rounded,
           iconColor: const Color(0xFF34C759),
           iconBg: const Color(0xFFEBF9EE),
+          onTap: history,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Sotuvlar tarixi',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: ink,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: history,
+              icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+              label: const Text('Barchasi'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
         Material(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -391,7 +442,7 @@ mixin CoalScreens on State<ShopHome> {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Barcha cheklar va sotuv amallari',
+                          'Barcha cheklar, mahsulot va mijozlar',
                           style: TextStyle(fontSize: 12, color: muted),
                         ),
                       ],
@@ -413,61 +464,62 @@ mixin CoalScreens on State<ShopHome> {
     required IconData icon,
     required Color iconColor,
     required Color iconBg,
-  }) => Container(
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: Colors.white,
+    VoidCallback? onTap,
+  }) => Material(
+    color: Colors.white,
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: line),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x06000000),
-          blurRadius: 10,
-          offset: Offset(0, 3),
-        ),
-      ],
+      side: const BorderSide(color: line),
     ),
-    child: Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: iconBg,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: iconColor, size: 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: muted,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(14),
               ),
-              const SizedBox(height: 4),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${money(amount)} so‘m',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: ink,
-                    letterSpacing: -0.5,
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: muted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${money(amount)} so‘m',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: ink,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: muted, size: 20),
+          ],
         ),
-      ],
+      ),
     ),
   );
 
@@ -763,42 +815,64 @@ mixin CoalScreens on State<ShopHome> {
                       const SizedBox(height: 10),
                     ],
                     const SizedBox(height: 6),
-                    FilledButton(
-                      onPressed: saving ? null : () => submit(false),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: Text(
-                        saving ? 'Saqlanmoqda...' : 'Saqlash',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
                     if (sms) ...[
-                      const SizedBox(height: 10),
-                      FilledButton(
+                      FilledButton.icon(
                         onPressed: saving ? null : () => submit(true),
+                        icon: const Icon(Icons.send_rounded, size: 18),
+                        label: const Text(
+                          'Saqlash va xabar yuborish',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFE5F1FF),
-                          foregroundColor: green,
+                          backgroundColor: green,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      FilledButton.icon(
+                        onPressed: saving ? null : () => submit(false),
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: Text(
+                          saving ? 'Saqlanmoqda...' : 'Saqlash (xabar yubormaslik)',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF3B30),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           elevation: 0,
+                        ),
+                      ),
+                    ] else ...[
+                      FilledButton(
+                        onPressed: saving ? null : () => submit(false),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: green,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: const Text(
-                          'Saqlash va xabar yuborish',
-                          style: TextStyle(
-                            fontSize: 15,
+                        child: Text(
+                          saving ? 'Saqlanmoqda...' : 'Saqlash',
+                          style: const TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -1011,14 +1085,17 @@ mixin CoalScreens on State<ShopHome> {
 
   Future<void> compose(Json sale) async {
     try {
-      await const MethodChannel('uz.dokon/sms').invokeMethod('compose', {
+      final res = await const MethodChannel('uz.dokon/sms').invokeMethod<String>('compose', {
         'phone': sale['phone'],
         'body': coalReceipt(sale),
       });
+      if (mounted && res == 'SENT_DIRECT') {
+        notice('SMS mijozga to‘g‘ridan-to‘g‘ri yuborildi!');
+      }
     } catch (_) {
       if (mounted)
         notice(
-          'Savdo saqlandi. SMS oynasi ochilmadi. Chekdan qayta urinishingiz mumkin.',
+          'Savdo saqlandi. SMS yuborilmadi. Chekdan qayta urinishingiz mumkin.',
         );
     }
   }
@@ -1141,11 +1218,11 @@ class _CustomerFieldsState extends State<_CustomerFields> {
 }
 
 String coalReceipt(Json s) {
-  final how = switch (s['method']) {
-    'Qarz' || 'Nasiya' => 'qarzga',
-    'Karta' => 'karta orqali',
-    _ => 'naqd pulga',
-  };
   final date = DateTime.parse(s['date']);
-  return 'Assalomu alaykum, hurmatli mijoz! Siz Xo‘jalar ko‘mir omboridan $how mahsulot oldingiz.\nChek #${s['number']} · ${dateLabel(date)} ${timeLabel(date)}\nMijoz: ${s['customer']}\n${(s['lines'] as List).map((l) => "${l['name']}: ${l['quantity']} ${l['unit'] ?? 'dona'} × ${money(l['price'])} so‘m").join('\n')}\nJami: ${money(s['total'])} so‘m\nTo‘lov: ${s['method']}';
+  final formattedDate =
+      '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  final lines = (s['lines'] as List)
+      .map((l) => "${l['name']}: ${l['quantity']} ${l['unit'] ?? 'dona'} * ${money(l['price'])} so'm")
+      .join('\n');
+  return "Assalomu alaykum\nDokon: Xo'jalar\nVaqti: $formattedDate\nMijoz: ${s['customer']}\n$lines\nJami: ${money(s['total'])} so'm\nTo'lov: ${s['method']}\nChek #${s['number']}";
 }

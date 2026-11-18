@@ -932,21 +932,55 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                     )
                   : ListView.separated(
                       itemCount: sales.length,
-                      separatorBuilder: (_, i) => const Divider(),
+                      separatorBuilder: (_, i) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
                         final s = sales.reversed.elementAt(i);
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            'Chek #${s['number']} · ${money(s['total'])} so‘m',
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                        final date = DateTime.parse(s['date']);
+                        final formattedDate =
+                            '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+                        final lines = (s['lines'] as List?) ?? [];
+                        final productName = lines.isNotEmpty
+                            ? '${lines.first['name']}${lines.first['quantity'] != null ? ' (${lines.first['quantity']} ${lines.first['unit'] ?? ''})' : ''}'
+                            : 'Ko‘mir';
+                        return Material(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: const BorderSide(color: line),
                           ),
-                          subtitle: Text(
-                            '${dateLabel(DateTime.parse(s['date']))} · ${s['method']}',
-                            style: const TextStyle(fontSize: 12, color: muted),
+                          child: InkWell(
+                            onTap: () => showReceipt(s),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          productName,
+                                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: ink),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '$formattedDate · ${s['method']}',
+                                          style: const TextStyle(fontSize: 12, color: muted),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    '${money(s['total'])} so‘m',
+                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: green),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.chevron_right_rounded, color: muted, size: 18),
+                                ],
+                              ),
+                            ),
                           ),
-                          trailing: const Icon(Icons.chevron_right_rounded, color: muted),
-                          onTap: () => showReceipt(s),
                         );
                       },
                     ),
@@ -1018,23 +1052,116 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                   )
                 : ListView.separated(
                     itemCount: store.sales.length,
-                    separatorBuilder: (_, i) => const Divider(),
+                    separatorBuilder: (_, i) => const SizedBox(height: 12),
                     itemBuilder: (_, i) {
                       final s = store.sales.reversed.elementAt(i);
-                      return ListTile(
-                        title: Text(
-                          'Chek #${s['number']} · ${money(s['total'])} so‘m',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                      final date = DateTime.parse(s['date']);
+                      final formattedDate =
+                          '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+                      final lines = (s['lines'] as List?) ?? [];
+                      final productName = lines.isNotEmpty
+                          ? '${lines.first['name']}${lines.first['quantity'] != null ? ' (${lines.first['quantity']} ${lines.first['unit'] ?? 'dona'})' : ''}'
+                          : 'Ko‘mir mahsuloti';
+
+                      return Material(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: line, width: 0.8),
+                        ),
+                        child: InkWell(
+                          onTap: () => showReceipt(s),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        productName,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: ink,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '${money(s['total'])} so‘m',
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        color: green,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.person_rounded, size: 16, color: muted),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      s['customer'] ?? 'Oddiy xaridor',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: ink,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    badge(
+                                      s['method'] ?? 'Naqd',
+                                      s['method'] == 'Qarz'
+                                          ? const Color(0xFFFF9500)
+                                          : const Color(0xFF34C759),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                const Divider(height: 1),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.access_time_rounded, size: 15, color: muted),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          formattedDate,
+                                          style: const TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w500,
+                                            color: muted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Chek #${s['number']}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: muted,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(Icons.chevron_right_rounded, size: 18, color: muted),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        subtitle: Text(
-                          '${dateLabel(DateTime.parse(s['date']))} · ${timeLabel(DateTime.parse(s['date']))}\n${s['customer']} · ${s['method']}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        trailing: const Icon(Icons.chevron_right_rounded, color: muted),
-                        onTap: () => showReceipt(s),
                       );
                     },
                   ),

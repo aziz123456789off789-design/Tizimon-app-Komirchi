@@ -74,6 +74,13 @@ void main() {
     await tester.tap(find.text('Angren'));
     await tester.pumpAndSettle();
     await capture('phone_modal');
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hisobotlar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Barchasi'));
+    await tester.pumpAndSettle();
+    await capture('phone_history');
     expect(tester.takeException(), isNull);
   });
 }
