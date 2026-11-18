@@ -1,6 +1,6 @@
 // Keep compatibility with Flutter 3.35+, before the Material package split.
 // ignore: deprecated_member_use
-import 'dart:ui' as ui;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -165,26 +165,92 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
     if (mounted) setState(() {});
   }
 
+  OverlayEntry? _hudEntry;
+
   @override
   void dispose() {
+    if (_hudEntry?.mounted ?? false) {
+      _hudEntry?.remove();
+    }
+    _hudEntry = null;
     store.removeListener(refresh);
     search.dispose();
     super.dispose();
   }
 
+  @override
   void navigate(int value) => setState(() {
     page = value;
     query = '';
     search.clear();
   });
 
-  void notice(String text) => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ),
-  );
+  @override
+  void showCenterNotice(
+    String message, {
+    String? title,
+    IconData? icon,
+    Color? color,
+  }) {
+    if (_hudEntry?.mounted ?? false) {
+      _hudEntry?.remove();
+    }
+    _hudEntry = null;
+
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(fontWeight: FontWeight.w500)),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    _hudEntry = OverlayEntry(
+      builder: (ctx) => CenterHud(
+        message: message,
+        title: title ?? 'SMS Yuborildi',
+        icon: icon ?? Icons.mark_email_read_rounded,
+        color: color ?? const Color(0xFF34C759),
+        onDismiss: () {
+          if (_hudEntry?.mounted ?? false) {
+            _hudEntry?.remove();
+          }
+          _hudEntry = null;
+        },
+      ),
+    );
+    overlay.insert(_hudEntry!);
+  }
+
+  @override
+  void notice(String text) {
+    if (text.toLowerCase().contains('yuborildi') || text.toLowerCase().contains('sms')) {
+      showCenterNotice(
+        text,
+        title: text.toLowerCase().contains('eslatma')
+            ? 'SMS Eslatma Yuborildi'
+            : (text.toLowerCase().contains('sms') ? 'SMS Yuborildi' : 'Muvaffaqiyatli'),
+        icon: text.toLowerCase().contains('xato') || text.toLowerCase().contains('bo‘lmadi')
+            ? Icons.error_outline_rounded
+            : Icons.mark_email_read_rounded,
+        color: text.toLowerCase().contains('xato') || text.toLowerCase().contains('bo‘lmadi')
+            ? Colors.red
+            : const Color(0xFF34C759),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
 
   Future<bool> act(Future<void> Function() action, [String? message]) async {
     try {
@@ -233,10 +299,10 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
     ),
   );
 
-  Widget metric(String title, String value, IconData icon, Color color) =>
+  Widget metric(String title, String value, IconData icon, Color color, [String? subValue]) =>
       panel(
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
               Expanded(
@@ -249,21 +315,30 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
                         value,
-                        style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w700,
-                          color: ink,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: color == green ? ink : color,
                           letterSpacing: -0.4,
                         ),
                         maxLines: 1,
                       ),
                     ),
+                    if (subValue != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subValue,
+                        style: const TextStyle(fontSize: 11, color: muted),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -304,26 +379,26 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
   );
 
   Widget empty(String title, String description, IconData icon) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
               color: Color(0xFFF2F2F7),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 36, color: muted),
+            child: Icon(icon, size: 32, color: muted),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: ink),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             description,
             textAlign: TextAlign.center,
@@ -369,21 +444,24 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
       stats([
         metric(
           'Naqd pul',
-          '${money(store.cash)} so‘m',
+          store.cash >= 1000000 ? formatMln(store.cash) : '${money(store.cash)} so‘m',
           Icons.payments_rounded,
           const Color(0xFF34C759),
+          store.cash >= 1000000 ? '${money(store.cash)} so‘m' : null,
         ),
         metric(
           'Karta hisobi',
-          '${money(store.card)} so‘m',
+          store.card >= 1000000 ? formatMln(store.card) : '${money(store.card)} so‘m',
           Icons.credit_card_rounded,
           green,
+          store.card >= 1000000 ? '${money(store.card)} so‘m' : null,
         ),
         metric(
           'Mijozlar qarzi',
-          '${money(store.debt)} so‘m',
+          store.debt >= 1000000 ? formatMln(store.debt) : '${money(store.debt)} so‘m',
           Icons.schedule_rounded,
           const Color(0xFFFF9500),
+          store.debt >= 1000000 ? '${money(store.debt)} so‘m' : null,
         ),
       ]),
       const SizedBox(height: 18),
@@ -511,9 +589,10 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
           ),
           metric(
             'Jami qarzdorlik',
-            '${money(store.debt)} so‘m',
+            store.debt >= 1000000 ? formatMln(store.debt) : '${money(store.debt)} so‘m',
             Icons.schedule_rounded,
             const Color(0xFFFF3B30),
+            store.debt >= 1000000 ? '${money(store.debt)} so‘m' : null,
           ),
         ]),
         const SizedBox(height: 16),
@@ -585,7 +664,9 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                     ),
                                     child: Text(
-                                      '${money(c['debt'])} so‘m\nQarzni to‘lash',
+                                      c['debt'] >= 1000000
+                                          ? '${formatMln(c['debt'])}\n${money(c['debt'])} so‘m'
+                                          : '${money(c['debt'])} so‘m\nQarzni to‘lash',
                                       textAlign: TextAlign.right,
                                       style: const TextStyle(
                                         fontSize: 11.5,
@@ -596,7 +677,17 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                                   ),
                                 ],
                               )
-                            : badge('Qarz yo‘q', const Color(0xFF34C759)),
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  badge('Qarz yo‘q', const Color(0xFF34C759)),
+                                  IconButton(
+                                    tooltip: 'Mijozni o‘chirish',
+                                    icon: const Icon(Icons.delete_outline_rounded, color: muted, size: 20),
+                                    onPressed: () => confirmDeleteCustomer(c),
+                                  ),
+                                ],
+                              ),
                         onTap: () => customerDetails(c),
                       );
                     },
@@ -955,10 +1046,81 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                 },
               ),
             ),
+            const SizedBox(height: 10),
+            Material(
+              color: const Color(0xFFFFF5F5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: Color(0xFFFFD1D1)),
+              ),
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF3B30),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                ),
+                title: const Text('Mijozni o‘chirish', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: Color(0xFFFF3B30))),
+                subtitle: const Text('Mijozni ro‘yxatdan butunlay o‘chirib tashlash', style: TextStyle(fontSize: 12, color: muted)),
+                trailing: const Icon(Icons.chevron_right_rounded, color: muted),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  confirmDeleteCustomer(c);
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> confirmDeleteCustomer(Json c, {bool fromDetails = false}) async {
+    final debt = c['debt'] as int? ?? 0;
+    final message = debt > 0
+        ? '${c['name']} mijozida ${money(debt)} so‘m qarz mavjud.\n\nHaqiqatan ham bu mijozni o‘chirmoqchimisiz?'
+        : 'Haqiqatan ham "${c['name']}" mijozini o‘chirmoqchimisiz?';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFFF3B30), size: 26),
+            SizedBox(width: 10),
+            Text('Mijozni o‘chirish', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ],
+        ),
+        content: Text(message, style: const TextStyle(fontSize: 14, height: 1.5)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dlgCtx, false),
+            child: const Text('Bekor qilish', style: TextStyle(color: muted, fontWeight: FontWeight.w600)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dlgCtx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF3B30),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('O‘chirish', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (fromDetails && mounted) {
+        Navigator.pop(context);
+      }
+      await store.deleteCustomer(c['id']);
+      if (mounted) {
+        notice('${c['name']} muvaffaqiyatli o‘chirildi.');
+      }
+    }
   }
 
   Future<void> debtSmsDialog(Json c) async {
@@ -1041,22 +1203,26 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                     border: Border.all(color: line),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            c['name'],
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: ink),
-                          ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            'Qarzdorlik miqdori:',
-                            style: TextStyle(fontSize: 12, color: muted),
-                          ),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              c['name'],
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: ink),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Qarzdorlik miqdori:',
+                              style: TextStyle(fontSize: 12, color: muted),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         '${money(c['debt'])} so‘m',
                         style: const TextStyle(
@@ -1133,9 +1299,19 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                         'body': bodyCtrl.text.trim(),
                       });
                       if (mounted && res == 'SENT_DIRECT') {
-                        notice('SMS eslatma mijozga to‘g‘ridan-to‘g‘ri yuborildi!');
+                        showCenterNotice(
+                          'Mijozga to‘g‘ridan-to‘g‘ri yuborildi!',
+                          title: 'SMS Eslatma Yuborildi',
+                          icon: Icons.mark_email_read_rounded,
+                          color: const Color(0xFF34C759),
+                        );
                       } else if (mounted) {
-                        notice('SMS yuborish ilovasi ochildi.');
+                        showCenterNotice(
+                          'SMS yuborish ilovasi ochildi.',
+                          title: 'SMS Ilovasi',
+                          icon: Icons.sms_rounded,
+                          color: green,
+                        );
                       }
                     } catch (_) {
                       if (mounted) notice('SMS eslatma yuborib bo‘lmadi.');
@@ -1225,6 +1401,11 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                   ),
                 ),
                 IconButton(
+                  tooltip: 'Mijozni o‘chirish',
+                  onPressed: () => confirmDeleteCustomer(c, fromDetails: true),
+                  icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFFF3B30)),
+                ),
+                IconButton(
                   onPressed: () => Navigator.pop(ctx),
                   icon: const Icon(Icons.close_rounded, color: muted),
                 ),
@@ -1256,7 +1437,9 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                     children: [
                       const Text('Qarz:', style: TextStyle(color: muted, fontSize: 13)),
                       Text(
-                        '${money(c['debt'])} so‘m',
+                        c['debt'] >= 1000000
+                            ? '${formatMln(c['debt'])} (${money(c['debt'])} so‘m)'
+                            : '${money(c['debt'])} so‘m',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           color: c['debt'] > 0 ? const Color(0xFFFF9500) : const Color(0xFF34C759),
@@ -1377,6 +1560,21 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                       },
                     ),
             ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => confirmDeleteCustomer(c, fromDetails: true),
+              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFFF3B30)),
+              label: const Text(
+                'Mijozni o‘chirish',
+                style: TextStyle(color: Color(0xFFFF3B30), fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFFFD1D1)),
+                backgroundColor: const Color(0xFFFFF5F5),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
           ],
         ),
       ),
@@ -1482,13 +1680,27 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                                         ),
                                       ),
                                     ),
-                                    Text(
-                                      '${money(s['total'])} so‘m',
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                        color: green,
-                                      ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          s['total'] >= 1000000 ? formatMln(s['total']) : '${money(s['total'])} so‘m',
+                                          style: const TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w800,
+                                            color: green,
+                                          ),
+                                        ),
+                                        if (s['total'] >= 1000000)
+                                          Text(
+                                            '${money(s['total'])} so‘m',
+                                            style: const TextStyle(
+                                              fontSize: 11.5,
+                                              color: muted,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -1673,4 +1885,184 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
       ),
     ),
   );
+}
+
+class CenterHud extends StatefulWidget {
+  const CenterHud({
+    super.key,
+    required this.message,
+    this.title = 'SMS Yuborildi',
+    this.icon = Icons.mark_email_read_rounded,
+    this.color = const Color(0xFF34C759),
+    required this.onDismiss,
+    this.duration = const Duration(milliseconds: 2400),
+  });
+
+  final String message;
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onDismiss;
+  final Duration duration;
+
+  @override
+  State<CenterHud> createState() => _CenterHudState();
+}
+
+class _CenterHudState extends State<CenterHud>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<double> _fade;
+  Timer? _timer;
+  bool _dismissing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+    _scale = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+      reverseCurve: Curves.easeIn,
+    );
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    );
+    _controller.forward();
+    _timer = Timer(widget.duration, _dismiss);
+  }
+
+  void _dismiss() {
+    if (!mounted || _dismissing) return;
+    _dismissing = true;
+    _timer?.cancel();
+    _controller.reverse().then((_) {
+      if (mounted) widget.onDismiss();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _dismiss,
+      behavior: HitTestBehavior.opaque,
+      child: FadeTransition(
+        opacity: _fade,
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.28),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: ScaleTransition(
+            scale: _scale,
+            child: Material(
+              color: Colors.transparent,
+              child: GestureDetector(
+                onTap: _dismiss,
+                child: Container(
+                  width: double.infinity,
+                  constraints: const BoxConstraints(maxWidth: 320),
+                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 26),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(
+                      color: const Color(0xFFE5E5EA),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.16),
+                        blurRadius: 36,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 14),
+                      ),
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 68,
+                          height: 68,
+                          decoration: BoxDecoration(
+                            color: widget.color.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            color: widget.color,
+                            size: 36,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF1C1C1E),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF636366),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: widget.color.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_rounded, size: 15, color: widget.color),
+                              const SizedBox(width: 5),
+                              Text(
+                                'Yuborildi',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: widget.color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

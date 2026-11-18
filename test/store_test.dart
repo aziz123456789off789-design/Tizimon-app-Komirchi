@@ -120,4 +120,15 @@ void main() {
       );
     },
   );
+
+  test('deleteCustomer removes customer from list and persists change', () async {
+    expect(store.customers.length, 2);
+    await store.deleteCustomer('customer-1');
+    expect(store.customers.length, 1);
+    expect(store.customers.any((c) => c['id'] == 'customer-1'), isFalse);
+    final reloaded = ShopStore(disk);
+    await reloaded.load();
+    expect(reloaded.customers.length, 1);
+    expect(reloaded.customers.any((c) => c['id'] == 'customer-1'), isFalse);
+  });
 }

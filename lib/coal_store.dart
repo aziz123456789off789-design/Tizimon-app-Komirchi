@@ -1,4 +1,4 @@
-part of 'store.dart';
+﻿part of 'store.dart';
 
 extension CoalStore on ShopStore {
   List<Json> get coal => products

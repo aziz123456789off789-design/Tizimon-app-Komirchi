@@ -6,12 +6,20 @@ mixin CoalScreens on State<ShopHome> {
   String get query;
   Widget searchField(String hint);
   void notice(String text);
+  void showCenterNotice(
+    String message, {
+    String? title,
+    IconData? icon,
+    Color? color,
+  });
   void history();
   void showReceipt(Json receipt);
   Widget cashPage();
   Widget customersPage();
   Future<void> customerDialog();
   void navigate(int page);
+  Widget badge(String label, Color color);
+  Widget empty(String title, String description, IconData icon);
 
   static const names = ['Hisobotlar', 'Sotuv', 'Ombor', 'Kassa', 'Mijozlar'];
   static const symbols = [
@@ -31,169 +39,170 @@ mixin CoalScreens on State<ShopHome> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    extendBody: true,
+    extendBody: false,
     appBar: AppBar(
       toolbarHeight: 64,
-      backgroundColor: Colors.white.withOpacity(0.92),
+      backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(0.5),
-        child: Divider(height: 0.5, thickness: 0.5, color: line),
+        preferredSize: Size.fromHeight(0.8),
+        child: Divider(height: 0.8, thickness: 0.8, color: line),
       ),
       title: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(11),
-            child: Image.asset('assets/tizimon.png', width: 42, height: 42),
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset('assets/tizimon.png', width: 38, height: 38),
           ),
           const SizedBox(width: 12),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Tizimon',
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.6,
-                  color: ink,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  names[page],
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    color: ink,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                'Xo‘jalar ko‘mir ombori',
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: muted,
-                  fontWeight: FontWeight.w500,
+                const Text(
+                  'Xo‘jalar ko‘mir ombori',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: muted,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
       actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 14),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFF2F2F7),
-              shape: BoxShape.circle,
+        if (page == 2) ...[
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton.icon(
+              onPressed: () => editCoal(),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Qo‘shish', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              style: FilledButton.styleFrom(
+                backgroundColor: green,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
+          ),
+        ] else if (page == 4) ...[
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton.icon(
+              onPressed: customerDialog,
+              icon: const Icon(Icons.person_add_rounded, size: 18),
+              label: const Text('Qo‘shish', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              style: FilledButton.styleFrom(
+                backgroundColor: green,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ] else ...[
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
             child: IconButton(
               tooltip: 'Sotuvlar tarixi',
               onPressed: history,
-              icon: const Icon(Icons.history_rounded, color: ink, size: 22),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF2F2F7),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.history_rounded, color: ink, size: 20),
+              ),
             ),
           ),
-        ),
+        ],
       ],
     ),
     body: SafeArea(
-      bottom: false,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 900),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 75),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  names[page],
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 14),
-                Expanded(
-                  child: switch (page) {
-                    0 => reports(),
-                    1 || 2 => catalog(),
-                    3 => cashPage(),
-                    _ => customersPage(),
-                  },
-                ),
-                if (page == 2 || page == 4)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 3,
-                        shadowColor: green.withOpacity(0.35),
-                      ),
-                      icon: const Icon(Icons.add_rounded, size: 20),
-                      onPressed: page == 2 ? () => editCoal() : customerDialog,
-                      label: Text(
-                        page == 2 ? 'Mahsulot qo‘shish' : 'Mijoz qo‘shish',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: switch (page) {
+              0 => reports(),
+              1 || 2 => catalog(),
+              3 => cashPage(),
+              _ => customersPage(),
+            },
           ),
         ),
       ),
     ),
-    bottomNavigationBar: ClipRect(
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.82),
-            border: const Border(
-              top: BorderSide(color: Color(0x1F000000), width: 0.5),
-            ),
-          ),
-          child: SafeArea(
-            top: false,
-            child: SizedBox(
-              height: 56,
-              child: Row(
-                children: List.generate(5, (i) {
-                  final selected = page == i;
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        navigate(i);
-                      },
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            selected ? activeSymbols[i] : symbols[i],
-                            color: selected ? green : muted,
-                            size: 24,
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            names[i],
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              color: selected ? green : muted,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                        ],
+    bottomNavigationBar: Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Color(0xFFE5E5EA), width: 0.8),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: List.generate(5, (i) {
+              final selected = page == i;
+              return Expanded(
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    navigate(i);
+                  },
+                  splashColor: green.withOpacity(0.08),
+                  highlightColor: Colors.transparent,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: selected ? green.withOpacity(0.12) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          selected ? activeSymbols[i] : symbols[i],
+                          color: selected ? green : const Color(0xFF8E8E93),
+                          size: 24,
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              ),
-            ),
+                      const SizedBox(height: 2),
+                      Text(
+                        names[i],
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          color: selected ? green : const Color(0xFF8E8E93),
+                          letterSpacing: -0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ),
         ),
       ),
@@ -202,22 +211,27 @@ mixin CoalScreens on State<ShopHome> {
 
   Widget reports() {
     final now = DateTime.now();
-    int sum(bool Function(DateTime) matches) => store.sales
-        .where((s) => matches(DateTime.parse(s['date']).toLocal()))
-        .fold(0, (n, s) => n + (s['total'] as int));
 
-    final todaySales = sum(
-      (d) => d.year == now.year && d.month == now.month && d.day == now.day,
-    );
-    final totalSales = sum((_) => true);
-    final monthlySales = sum((d) => d.year == now.year && d.month == now.month);
-    final yearlySales = sum((d) => d.year == now.year);
-    final todayCount = store.sales
-        .where((s) {
-          final d = DateTime.parse(s['date']).toLocal();
-          return d.year == now.year && d.month == now.month && d.day == now.day;
-        })
-        .length;
+    final todaySalesList = store.sales.where((s) {
+      final d = DateTime.parse(s['date']).toLocal();
+      return d.year == now.year && d.month == now.month && d.day == now.day;
+    }).toList();
+
+    final monthSalesList = store.sales.where((s) {
+      final d = DateTime.parse(s['date']).toLocal();
+      return d.year == now.year && d.month == now.month;
+    }).toList();
+
+    final yearSalesList = store.sales.where((s) {
+      final d = DateTime.parse(s['date']).toLocal();
+      return d.year == now.year;
+    }).toList();
+
+    final todaySales = todaySalesList.fold(0, (n, s) => n + (s['total'] as int));
+    final totalSales = store.sales.fold(0, (n, s) => n + (s['total'] as int));
+    final monthlySales = monthSalesList.fold(0, (n, s) => n + (s['total'] as int));
+    final yearlySales = yearSalesList.fold(0, (n, s) => n + (s['total'] as int));
+    final todayCount = todaySalesList.length;
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
@@ -226,10 +240,14 @@ mixin CoalScreens on State<ShopHome> {
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: history,
+            onTap: () => showAnalytics(
+              title: 'Bugungi savdo analitikasi',
+              subtitle: '${dateLabel(now)} holatiga ko‘ra',
+              sales: todaySalesList,
+            ),
             borderRadius: BorderRadius.circular(22),
             child: Container(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF007AFF), Color(0xFF0051C7)],
@@ -251,32 +269,38 @@ mixin CoalScreens on State<ShopHome> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.18),
-                              borderRadius: BorderRadius.circular(10),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.18),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.today_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.today_rounded,
-                              color: Colors.white,
-                              size: 20,
+                            const SizedBox(width: 10),
+                            const Flexible(
+                              child: Text(
+                                'Bugungi savdo',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          const Text(
-                            'Bugungi savdo',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -297,12 +321,12 @@ mixin CoalScreens on State<ShopHome> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '${money(todaySales)} so‘m',
+                      todaySales >= 1000000 ? formatMln(todaySales) : '${money(todaySales)} so‘m',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 34,
@@ -311,32 +335,49 @@ mixin CoalScreens on State<ShopHome> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  if (todaySales >= 1000000) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      '${money(todaySales)} so‘m',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '${dateLabel(now)} holatiga ko‘ra',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.75),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
+                      Expanded(
+                        child: Text(
+                          '${dateLabel(now)} holatiga ko‘ra',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.75),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Tarixni ko‘rish',
+                            'Aniq analitika',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withOpacity(0.95),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
+                          const SizedBox(width: 2),
                           Icon(
                             Icons.chevron_right_rounded,
-                            color: Colors.white.withOpacity(0.9),
-                            size: 16,
+                            color: Colors.white.withOpacity(0.95),
+                            size: 18,
                           ),
                         ],
                       ),
@@ -347,32 +388,44 @@ mixin CoalScreens on State<ShopHome> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _reportCard(
           title: 'Umumiy savdo',
           amount: totalSales,
           icon: Icons.all_inclusive_rounded,
           iconColor: const Color(0xFF007AFF),
           iconBg: const Color(0xFFEAF2FF),
-          onTap: history,
+          onTap: () => showAnalytics(
+            title: 'Umumiy savdo analitikasi',
+            subtitle: 'Barcha davrlar bo‘yicha to‘liq hisobot',
+            sales: store.sales,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         _reportCard(
           title: 'Oylik savdo',
           amount: monthlySales,
           icon: Icons.calendar_month_rounded,
           iconColor: const Color(0xFF5856D6),
           iconBg: const Color(0xFFF0EFFF),
-          onTap: history,
+          onTap: () => showAnalytics(
+            title: 'Oylik savdo analitikasi',
+            subtitle: '${now.year}-yil ${now.month}-oy hisoboti',
+            sales: monthSalesList,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         _reportCard(
           title: 'Yillik savdo',
           amount: yearlySales,
           icon: Icons.date_range_rounded,
           iconColor: const Color(0xFF34C759),
           iconBg: const Color(0xFFEBF9EE),
-          onTap: history,
+          onTap: () => showAnalytics(
+            title: 'Yillik savdo analitikasi',
+            subtitle: '${now.year}-yil hisoboti',
+            sales: yearSalesList,
+          ),
         ),
         const SizedBox(height: 18),
         Row(
@@ -405,13 +458,6 @@ mixin CoalScreens on State<ShopHome> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: line),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x06000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
-                  ),
-                ],
               ),
               child: Row(
                 children: [
@@ -436,7 +482,7 @@ mixin CoalScreens on State<ShopHome> {
                           'Sotuvlar tarixi',
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             color: ink,
                           ),
                         ),
@@ -475,7 +521,7 @@ mixin CoalScreens on State<ShopHome> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
@@ -491,37 +537,434 @@ mixin CoalScreens on State<ShopHome> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: muted,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: muted,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Text(
+                        'Analitika >',
+                        style: TextStyle(
+                          color: green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '${money(amount)} so‘m',
+                      amount >= 1000000 ? formatMln(amount) : '${money(amount)} so‘m',
                       style: const TextStyle(
                         fontSize: 22,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                         color: ink,
                         letterSpacing: -0.5,
                       ),
                     ),
                   ),
+                  if (amount >= 1000000) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      '${money(amount)} so‘m',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: muted,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: muted, size: 20),
           ],
         ),
       ),
     ),
   );
+
+  void showAnalytics({
+    required String title,
+    required String subtitle,
+    required List<Json> sales,
+  }) {
+    final total = sales.fold(0, (n, s) => n + (s['total'] as int));
+    final count = sales.length;
+    final avg = count > 0 ? (total / count).round() : 0;
+
+    final cashSales = sales.where((s) => s['method'] == 'Naqd').toList();
+    final cardSales = sales.where((s) => s['method'] == 'Karta').toList();
+    final debtSales = sales.where((s) => s['method'] == 'Qarz').toList();
+
+    final cashTotal = cashSales.fold(0, (n, s) => n + (s['total'] as int));
+    final cardTotal = cardSales.fold(0, (n, s) => n + (s['total'] as int));
+    final debtTotal = debtSales.fold(0, (n, s) => n + (s['total'] as int));
+
+    final Map<String, (double, String, int)> productsMap = {};
+    for (final s in sales) {
+      final lines = (s['lines'] as List?) ?? [];
+      for (final l in lines) {
+        final name = l['name'] as String? ?? 'Ko‘mir';
+        final qty = (l['quantity'] as num?)?.toDouble() ?? 0.0;
+        final unit = l['unit'] as String? ?? 'kg';
+        final price = (l['price'] as num?)?.toInt() ?? 0;
+        final lineTotal = (qty * price).round();
+
+        final current = productsMap[name];
+        if (current == null) {
+          productsMap[name] = (qty, unit, lineTotal);
+        } else {
+          productsMap[name] = (current.$1 + qty, unit, current.$3 + lineTotal);
+        }
+      }
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+          maxWidth: 600,
+        ),
+        margin: EdgeInsets.symmetric(
+          horizontal: MediaQuery.sizeOf(ctx).width > 600
+              ? (MediaQuery.sizeOf(ctx).width - 600) / 2
+              : 0,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Column(
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D6),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEBF3FF),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.analytics_rounded, color: green, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: ink),
+                      ),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(fontSize: 12, color: muted),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close_rounded, color: muted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Expanded(
+              child: ListView(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF007AFF), Color(0xFF0051C7)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Jami tushum',
+                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 6),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            total >= 1000000 ? formatMln(total) : '${money(total)} so‘m',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.8,
+                            ),
+                          ),
+                        ),
+                        if (total >= 1000000) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '${money(total)} so‘m',
+                            style: const TextStyle(color: Colors.white70, fontSize: 13),
+                          ),
+                        ],
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$count ta savdo',
+                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'O‘rtacha: ${money(avg)} so‘m',
+                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'To‘lov usullari tahlili',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+                  ),
+                  const SizedBox(height: 10),
+                  Material(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: line, width: 0.8),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _paymentRow('Naqd', cashTotal, cashSales.length, total, const Color(0xFF34C759)),
+                          const Divider(height: 20),
+                          _paymentRow('Karta', cardTotal, cardSales.length, total, const Color(0xFF007AFF)),
+                          const Divider(height: 20),
+                          _paymentRow('Qarz', debtTotal, debtSales.length, total, const Color(0xFFFF9500)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  if (productsMap.isNotEmpty) ...[
+                    const Text(
+                      'Mahsulotlar bo‘yicha sotuv hajmi',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+                    ),
+                    const SizedBox(height: 10),
+                    Material(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: line, width: 0.8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: productsMap.entries.map((e) {
+                            final name = e.key;
+                            final (qty, unit, prodTotal) = e.value;
+                            final qtyStr = qty.truncateToDouble() == qty ? qty.toInt().toString() : qty.toStringAsFixed(2);
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF2F2F7),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(Icons.terrain_rounded, size: 20, color: green),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: ink)),
+                                        Text('$qtyStr $unit sotildi', style: const TextStyle(fontSize: 12, color: muted)),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        prodTotal >= 1000000 ? formatMln(prodTotal) : '${money(prodTotal)} so‘m',
+                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: green),
+                                      ),
+                                      if (prodTotal >= 1000000)
+                                        Text('${money(prodTotal)} so‘m', style: const TextStyle(fontSize: 11, color: muted)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                  ],
+                  Text(
+                    'Cheklar ro‘yxati (${sales.length} ta)',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+                  ),
+                  const SizedBox(height: 10),
+                  if (sales.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Center(
+                        child: Text('Bu davrda savdolar mavjud emas.', style: TextStyle(color: muted)),
+                      ),
+                    )
+                  else
+                    ...sales.reversed.map((s) {
+                      final date = DateTime.parse(s['date']);
+                      final formattedDate =
+                          '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+                      final lines = (s['lines'] as List?) ?? [];
+                      final productName = lines.isNotEmpty
+                          ? '${lines.first['name']}${lines.first['quantity'] != null ? ' (${lines.first['quantity']} ${lines.first['unit'] ?? 'dona'})' : ''}'
+                          : 'Ko‘mir';
+                      final totalAmount = s['total'] as int? ?? 0;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Material(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: const BorderSide(color: line, width: 0.8),
+                          ),
+                          child: InkWell(
+                            onTap: () => showReceipt(s),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(productName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: ink)),
+                                        const SizedBox(height: 2),
+                                        Text('${s['customer']} · $formattedDate', style: const TextStyle(fontSize: 11.5, color: muted)),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        totalAmount >= 1000000 ? formatMln(totalAmount) : '${money(totalAmount)} so‘m',
+                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: green),
+                                      ),
+                                      badge(s['method'] ?? 'Naqd', s['method'] == 'Qarz' ? const Color(0xFFFF9500) : const Color(0xFF34C759)),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.chevron_right_rounded, color: muted, size: 18),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _paymentRow(String name, int amount, int count, int grandTotal, Color color) {
+    final pct = grandTotal > 0 ? (amount / grandTotal * 100).round() : 0;
+    return Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 8),
+            Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: ink)),
+            const SizedBox(width: 6),
+            Text('($count ta)', style: const TextStyle(fontSize: 12, color: muted)),
+            const Spacer(),
+            Text(
+              amount >= 1000000 ? formatMln(amount) : '${money(amount)} so‘m',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: ink),
+            ),
+            const SizedBox(width: 6),
+            Text('$pct%', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: color)),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: grandTotal > 0 ? amount / grandTotal : 0,
+            backgroundColor: const Color(0xFFF2F2F7),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            minHeight: 6,
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget catalog() {
     final products = store.coal
@@ -533,81 +976,103 @@ mixin CoalScreens on State<ShopHome> {
         .toList();
     return Column(
       children: [
-        searchField('Ko‘mir nomi yoki kategoriya'),
-        const SizedBox(height: 14),
+        searchField(page == 1 ? 'Sotuv uchun ko‘mir nomini qidiring' : 'Ko‘mir nomi yoki kategoriya'),
+        const SizedBox(height: 12),
         Expanded(
           child: products.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF2F2F7),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.terrain_rounded,
-                          color: green,
-                          size: 34,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        query.isEmpty
-                            ? 'Ko‘mir katalogi bo‘sh'
-                            : 'Mahsulot topilmadi',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => editCoal(),
-                        child: const Text('Ko‘mir turini qo‘shish'),
-                      ),
-                    ],
-                  ),
+              ? empty(
+                  query.isEmpty ? 'Ko‘mir katalogi bo‘sh' : 'Mahsulot topilmadi',
+                  page == 1 ? 'Oldin Ombor bo‘limidan mahsulot qo‘shing.' : 'Yuqoridagi + tugmasi orqali yangi tur qo‘shing.',
+                  Icons.terrain_outlined,
                 )
               : ListView.separated(
                   itemCount: products.length,
                   separatorBuilder: (_, i) => const SizedBox(height: 10),
                   itemBuilder: (_, i) {
                     final p = products[i];
-                    return Card(
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        leading: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEBF3FF),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.terrain_rounded,
-                            color: green,
-                            size: 22,
-                          ),
-                        ),
-                        title: Text(
-                          p['name'],
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: ink,
-                          ),
-                        ),
-                        subtitle: Text(
-                          p['category'],
-                          style: const TextStyle(fontSize: 12, color: muted),
-                        ),
-                        trailing: Icon(
-                          page == 2 ? Icons.edit_outlined : Icons.chevron_right_rounded,
-                          color: muted,
-                        ),
+                    return Material(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: line, width: 0.8),
+                      ),
+                      child: InkWell(
                         onTap: () => page == 2 ? editCoal(p) : saleForm(p),
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: page == 1 ? const Color(0xFFEBF3FF) : const Color(0xFFF2F2F7),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.terrain_rounded,
+                                  color: page == 1 ? green : ink,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      p['name'],
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: ink,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: canvas,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        p['category'],
+                                        style: const TextStyle(fontSize: 11.5, color: muted, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (page == 1) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: green,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.point_of_sale_rounded, color: Colors.white, size: 16),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        'Sotish',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ] else ...[
+                                const Icon(Icons.edit_outlined, color: muted, size: 20),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -1020,7 +1485,9 @@ mixin CoalScreens on State<ShopHome> {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                'Jami: ${money(total)} so‘m',
+                total >= 1000000
+                    ? 'Jami: ${formatMln(total)} (${money(total)} so‘m)'
+                    : 'Jami: ${money(total)} so‘m',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -1090,7 +1557,12 @@ mixin CoalScreens on State<ShopHome> {
         'body': coalReceipt(sale),
       });
       if (mounted && res == 'SENT_DIRECT') {
-        notice('SMS mijozga to‘g‘ridan-to‘g‘ri yuborildi!');
+        showCenterNotice(
+          'Mijozga to‘g‘ridan-to‘g‘ri yuborildi!',
+          title: 'SMS Yuborildi',
+          icon: Icons.mark_email_read_rounded,
+          color: const Color(0xFF34C759),
+        );
       }
     } catch (_) {
       if (mounted)

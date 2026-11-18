@@ -10,6 +10,21 @@ String money(num value) => value.round().toString().replaceAllMapped(
   RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
   (m) => '${m[1]} ',
 );
+
+String formatMln(num value) {
+  final v = value.round();
+  if (v.abs() < 1000000) {
+    return '${money(v)} so‘m';
+  }
+  final mln = v / 1000000.0;
+  String s = mln.toStringAsFixed(2);
+  if (s.endsWith('.00')) {
+    s = s.substring(0, s.length - 3);
+  } else if (s.endsWith('0')) {
+    s = s.substring(0, s.length - 1);
+  }
+  return '$s mln so‘m';
+}
 String dateLabel(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 String timeLabel(DateTime d) =>
@@ -134,6 +149,14 @@ class ShopStore extends ChangeNotifier {
       'phone': phone.trim(),
       'debt': 0,
     });
+  });
+
+  Future<void> deleteCustomer(String customerId) => _commit((d) {
+    final list = d['customers'] as List;
+    final index = list.indexWhere((c) => c['id'] == customerId);
+    if (index >= 0) {
+      list.removeAt(index);
+    }
   });
 
   Future<void> cashEntry(int amount, String note, String method) =>
