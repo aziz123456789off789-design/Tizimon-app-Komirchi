@@ -1226,3 +1226,34 @@ String coalReceipt(Json s) {
       .join('\n');
   return "Assalomu alaykum\nDokon: Xo'jalar\nVaqti: $formattedDate\nMijoz: ${s['customer']}\n$lines\nJami: ${money(s['total'])} so'm\nTo'lov: ${s['method']}\nChek #${s['number']}";
 }
+
+String debtSmsText(Json customer, List<Json> allSales) {
+  final name = (customer['name'] as String? ?? 'Mijoz').trim();
+  final debt = customer['debt'] as int? ?? 0;
+  final debtSales = allSales.where((s) {
+    final matchesId = s['customerId'] != null && s['customerId'] == customer['id'];
+    final matchesPhone = (customer['phone'] as String? ?? '').isNotEmpty && s['phone'] == customer['phone'];
+    final matchesName = s['customer'] == customer['name'];
+    return (matchesId || matchesPhone || matchesName) && s['method'] == 'Qarz';
+  }).toList();
+
+  String debtLine;
+  if (debtSales.isNotEmpty) {
+    final lastSale = debtSales.last;
+    final d = DateTime.tryParse(lastSale['date'] ?? '') ?? DateTime.now();
+    final dateStr = '${d.year}.${d.month.toString().padLeft(2, '0')}.${d.day.toString().padLeft(2, '0')}';
+    final saleAmount = lastSale['total'] ?? debt;
+    debtLine = "Siz $dateStr kuni ${money(saleAmount)} so'm qarz olgansiz.";
+  } else {
+    final now = DateTime.now();
+    final dateStr = '${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')}';
+    debtLine = "Siz $dateStr kuni qarz olgansiz.";
+  }
+
+  return "Assalomu alaykum, $name!\n"
+      "Dokon: Xo'jalar\n"
+      "$debtLine\n"
+      "To'lashingizni so'raymiz.\n"
+      "Jami qarzingiz: ${money(debt)} so'm.";
+}
+

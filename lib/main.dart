@@ -569,22 +569,32 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                           style: const TextStyle(color: muted, fontSize: 12),
                         ),
                         trailing: c['debt'] > 0
-                            ? TextButton(
-                                onPressed: () => repaymentDialog(c),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  backgroundColor: const Color(0xFFFFF4E5),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                child: Text(
-                                  '${money(c['debt'])} so‘m\nQarzni to‘lash',
-                                  textAlign: TextAlign.right,
-                                  style: const TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFFE65100),
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip: 'SMS eslatma yuborish',
+                                    icon: const Icon(Icons.sms_outlined, color: green, size: 22),
+                                    onPressed: () => debtSmsDialog(c),
                                   ),
-                                ),
+                                  TextButton(
+                                    onPressed: () => debtOptionsDialog(c),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      backgroundColor: const Color(0xFFFFF4E5),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                    child: Text(
+                                      '${money(c['debt'])} so‘m\nQarzni to‘lash',
+                                      textAlign: TextAlign.right,
+                                      style: const TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFE65100),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               )
                             : badge('Qarz yo‘q', const Color(0xFF34C759)),
                         onTap: () => customerDetails(c),
@@ -822,9 +832,347 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
       Text('${c['name']}\nQarz: ${money(c['debt'])} so‘m', style: const TextStyle(fontWeight: FontWeight.w600)),
       field(amount, 'To‘lov, so‘m', numeric: true, positive: true),
       methodField((v) => method = v),
+      const SizedBox(height: 6),
+      Center(
+        child: TextButton.icon(
+          onPressed: () {
+            Navigator.pop(context);
+            debtSmsDialog(c);
+          },
+          icon: const Icon(Icons.sms_outlined, size: 16),
+          label: const Text('Qarz haqida SMS eslatma yuborish'),
+          style: TextButton.styleFrom(foregroundColor: green),
+        ),
+      ),
     ], () => store.repay(c['id'], int.parse(amount.text), method));
     await Future<void>.delayed(const Duration(milliseconds: 350));
     amount.dispose();
+  }
+
+  Future<void> debtOptionsDialog(Json c) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: const BoxConstraints(maxWidth: 560),
+        margin: EdgeInsets.symmetric(
+          horizontal: MediaQuery.sizeOf(ctx).width > 600
+              ? (MediaQuery.sizeOf(ctx).width - 560) / 2
+              : 0,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D6),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        c['name'],
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ink),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Qarz: ${money(c['debt'])} so‘m',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFFFF9500)),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close_rounded, color: muted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Material(
+              color: const Color(0xFFF2F8FF),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: Color(0xFFCCE4FF)),
+              ),
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF007AFF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.sms_rounded, color: Colors.white, size: 20),
+                ),
+                title: const Text('SMS eslatma yuborish', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: ink)),
+                subtitle: const Text('Qarz olingan sana va to‘lash so‘rovi bilan SMS yuborish', style: TextStyle(fontSize: 12, color: muted)),
+                trailing: const Icon(Icons.chevron_right_rounded, color: muted),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  debtSmsDialog(c);
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            Material(
+              color: const Color(0xFFF0FDF4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: Color(0xFFBBF7D0)),
+              ),
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF16A34A),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.payments_rounded, color: Colors.white, size: 20),
+                ),
+                title: const Text('Qarzni to‘lash (To‘lov olish)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: ink)),
+                subtitle: const Text('Mijoz to‘lagan summani qabul qilish va balansdan ayirish', style: TextStyle(fontSize: 12, color: muted)),
+                trailing: const Icon(Icons.chevron_right_rounded, color: muted),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  repaymentDialog(c);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> debtSmsDialog(Json c) async {
+    final phoneCtrl = TextEditingController(text: c['phone'] ?? '');
+    final bodyCtrl = TextEditingController(text: debtSmsText(c, store.sales));
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+            maxWidth: 560,
+          ),
+          margin: EdgeInsets.symmetric(
+            horizontal: MediaQuery.sizeOf(ctx).width > 600
+                ? (MediaQuery.sizeOf(ctx).width - 560) / 2
+                : 0,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            MediaQuery.viewInsetsOf(ctx).bottom + 20,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD1D1D6),
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE5F1FF),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.sms_rounded, color: green, size: 20),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Qarz haqida SMS eslatma',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: ink,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: const Icon(Icons.close_rounded, color: muted),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: canvas,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: line),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            c['name'],
+                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: ink),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Qarzdorlik miqdori:',
+                            style: TextStyle(fontSize: 12, color: muted),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${money(c['debt'])} so‘m',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFFFF9500),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Mijoz telefon raqami',
+                    hintText: '+998901234567',
+                    prefixIcon: const Icon(Icons.phone_outlined, size: 20),
+                    filled: true,
+                    fillColor: canvas,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: line),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: line),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: green, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: bodyCtrl,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: 'SMS xabari matni',
+                    alignLabelWithHint: true,
+                    filled: true,
+                    fillColor: canvas,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: line),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: line),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: green, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                FilledButton.icon(
+                  onPressed: () async {
+                    var phone = phoneCtrl.text.trim();
+                    if (phone.isEmpty) {
+                      notice('Telefon raqamini kiriting.');
+                      return;
+                    }
+                    if (phone.length == 9 && !phone.startsWith('+')) {
+                      phone = '+998$phone';
+                    }
+                    Navigator.pop(ctx);
+                    try {
+                      final res = await const MethodChannel('uz.dokon/sms').invokeMethod<String>('compose', {
+                        'phone': phone,
+                        'body': bodyCtrl.text.trim(),
+                      });
+                      if (mounted && res == 'SENT_DIRECT') {
+                        notice('SMS eslatma mijozga to‘g‘ridan-to‘g‘ri yuborildi!');
+                      } else if (mounted) {
+                        notice('SMS yuborish ilovasi ochildi.');
+                      }
+                    } catch (_) {
+                      if (mounted) notice('SMS eslatma yuborib bo‘lmadi.');
+                    }
+                  },
+                  icon: const Icon(Icons.send_rounded, size: 18),
+                  label: const Text(
+                    'SMS eslatma yuborish',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: green,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: bodyCtrl.text.trim()));
+                    if (mounted) notice('SMS matni nusxalandi.');
+                  },
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  label: const Text('SMS matnini nusxalash'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    phoneCtrl.dispose();
+    bodyCtrl.dispose();
   }
 
   void customerDetails(Json c) {
@@ -916,6 +1264,50 @@ class _ShopHomeState extends State<ShopHome> with CoalScreens {
                       ),
                     ],
                   ),
+                  if (c['debt'] > 0) ...[
+                    const SizedBox(height: 12),
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              debtSmsDialog(c);
+                            },
+                            icon: const Icon(Icons.sms_rounded, size: 16),
+                            label: const Text('SMS eslatma', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFE5F1FF),
+                              foregroundColor: green,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              repaymentDialog(c);
+                            },
+                            icon: const Icon(Icons.payments_rounded, size: 16),
+                            label: const Text('Qarzni to‘lash', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF34C759),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
